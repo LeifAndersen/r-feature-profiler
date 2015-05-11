@@ -67,15 +67,17 @@ collect.marks <- function (filename = "Rprof.out",
     list(traces=traces,interval=sample.interval);
 }
 
+## Returns the desired mark from the list:
 filter.mark <- function(traces, mark) {
     lapply(traces, function(trace) {
         trace <- lapply(trace, function(frame) {
-            frame[[mark]];
+            frame[mark];
         })
         Filter(Negate(is.null), trace);
     })
 }
 
+## Feature profiler
 feature.profile <- function(filename = "Rprof.out",
                             features = c(),
                             chunksize = 5000) {
@@ -111,6 +113,5 @@ feature.profile <- function(filename = "Rprof.out",
 ## y <- filter.mark(x$traces,"foo");
 ## y
 
-x <- feature.profile(filename = "profile1.out",
-                     features = c("foo"));
-x
+feature.profile(filename = "tooper.out",
+                features = c("summary","foo"));
