@@ -47,12 +47,14 @@ collect.marks <- function (filename = "Rprof.out",
                marks <- strsplit(marks, ",");
                res <- c();
                for(mark in marks) {
-                   mark <- substr(mark, 1, nchar(mark) - 1);
-                   mark <- strsplit(mark, ":")[[1]];
-                   key <- rawToChar(base64decode(mark[1]));
-                   value <- rawToChar(base64decode(mark[2]));
-                   if(is.element(key, features)) {
-                       res[[key]]<-value;
+                   if(length(mark) > 0) {
+                       mark <- substr(mark, 1, nchar(mark) - 1);
+                       mark <- strsplit(mark, ":")[[1]];
+                       key <- rawToChar(base64decode(mark[1]));
+                       value <- rawToChar(base64decode(mark[2]));
+                       if(is.element(key, features)) {
+                           res[[key]]<-value;
+                       }
                    }
                }
                res;
@@ -73,13 +75,13 @@ filter.mark <- function(traces, mark) {
         trace <- lapply(trace, function(frame) {
             frame[mark];
         })
-        Filter(Negate(is.null), trace);
+        Filter(function(x) !(is.null(x) || is.na(x)), trace);
     })
 }
 
 ## Feature profiler
 feature.profile <- function(filename = "Rprof.out",
-                            features = c(),
+                            features = c("s3-dispatch", "summary"),
                             chunksize = 5000) {
 
     ## Collect Samples
@@ -95,7 +97,10 @@ feature.profile <- function(filename = "Rprof.out",
         ## Get the bottom mark of each of the stacks
         bottomMark <- sapply(featureMarks, function(trace) {
             if(length(trace) > 0) {
-                trace[[length(trace)]];
+                last <- trace[[length(trace)]];
+                if(last != "antimark") {
+                    last;
+                }
             }
         })
 
@@ -109,9 +114,4 @@ feature.profile <- function(filename = "Rprof.out",
          features=featureAnalysis);
 }
 
-## x <- collect.marks("profile1.out", features=c("foo"))
-## y <- filter.mark(x$traces,"foo");
-## y
-
-feature.profile(filename = "tooper.out",
-                features = c("summary","foo"));
+feature.profile(filename="micromethod.out")
